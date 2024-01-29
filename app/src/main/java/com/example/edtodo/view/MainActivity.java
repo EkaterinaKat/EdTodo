@@ -1,5 +1,6 @@
 package com.example.edtodo.view;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -9,11 +10,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.edtodo.R;
+import com.example.edtodo.db.Database;
 import com.example.edtodo.logic.Note;
-import com.example.edtodo.logic.Priority;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,6 +25,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         initViews();
+
+        addNoteButton.setOnClickListener(view -> {
+            Intent intent = CreateNoteActivity.newIntent(this);
+            startActivity(intent);
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         showNotes();
     }
 
@@ -35,9 +44,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showNotes() {
-        Random random = new Random();
-        for (int i = 0; i < 20; i++) {
-            Note note = new Note(i, "Note " + i, Priority.getById(random.nextInt(3)));
+        noteBox.removeAllViews();
+        for (Note note : Database.getInstance().getNotes()) {
             showNoteInBox(note);
         }
     }
