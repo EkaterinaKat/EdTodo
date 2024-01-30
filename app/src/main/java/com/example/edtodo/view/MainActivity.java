@@ -9,23 +9,21 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.edtodo.R;
-import com.example.edtodo.db.NoteDatabase;
 import com.example.edtodo.logic.Note;
+import com.example.edtodo.viewmodel.MainViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class MainActivity extends AppCompatActivity {
     private RecyclerView noteRecycleView;
     private FloatingActionButton addNoteButton;
     private NoteAdapter noteAdapter;
-    private NoteDatabase database;
+    private MainViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        database = NoteDatabase.getInstance(getApplication());
-
+        viewModel = new MainViewModel(getApplication());
         initViews();
 
         noteAdapter = new NoteAdapter();
@@ -33,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         });
         noteRecycleView.setAdapter(noteAdapter);
 
-        database.noteDao().getNotes().observe(this, notes -> noteAdapter.setNotes(notes));
+        viewModel.getNotes().observe(this, notes -> noteAdapter.setNotes(notes));
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
                 0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
@@ -49,8 +47,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 Note note = noteAdapter.getNotes().get(viewHolder.getAdapterPosition());
-
-                new Thread(() -> database.noteDao().remove(note.getId())).start();
+                viewModel.remove(note);
 
             }
         });
