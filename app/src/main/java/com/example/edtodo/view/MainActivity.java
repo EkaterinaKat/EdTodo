@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.edtodo.R;
-import com.example.edtodo.db.Database;
+import com.example.edtodo.db.NoteDatabase;
 import com.example.edtodo.logic.Note;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -18,11 +18,14 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView noteRecycleView;
     private FloatingActionButton addNoteButton;
     private NoteAdapter noteAdapter;
+    private NoteDatabase database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        database = NoteDatabase.getInstance(getApplication());
 
         initViews();
 
@@ -45,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 Note note = noteAdapter.getNotes().get(viewHolder.getAdapterPosition());
-                Database.getInstance().remove(note.getId());
+                database.noteDao().remove(note.getId());
                 showNotes();
             }
         });
@@ -69,6 +72,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showNotes() {
-        noteAdapter.setNotes(Database.getInstance().getNotes());
+        noteAdapter.setNotes(database.noteDao().getNotes());
     }
 }

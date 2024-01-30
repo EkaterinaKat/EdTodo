@@ -10,7 +10,7 @@ import android.widget.RadioButton;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.edtodo.R;
-import com.example.edtodo.db.Database;
+import com.example.edtodo.db.NoteDatabase;
 import com.example.edtodo.logic.Note;
 import com.example.edtodo.logic.Priority;
 
@@ -20,6 +20,7 @@ public class CreateNoteActivity extends AppCompatActivity {
     private RadioButton radioButtonLow;
     private RadioButton radioButtonMedium;
     private Button saveNoteButton;
+    private NoteDatabase database;
 
     public static Intent newIntent(Context context) {
         return new Intent(context, CreateNoteActivity.class);
@@ -29,6 +30,7 @@ public class CreateNoteActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_note);
+        database = NoteDatabase.getInstance(getApplication());
         initViews();
         saveNoteButton.setOnClickListener(view -> saveButtonListener());
     }
@@ -42,10 +44,10 @@ public class CreateNoteActivity extends AppCompatActivity {
 
     private void saveButtonListener() {
         Note note = new Note(
-                Database.getInstance().getNotes().size(),
+                0,
                 noteEditText.getText().toString().trim(),
                 getSelectedPriority());
-        Database.getInstance().add(note);
+        database.noteDao().add(note);
 
         finish();
     }
