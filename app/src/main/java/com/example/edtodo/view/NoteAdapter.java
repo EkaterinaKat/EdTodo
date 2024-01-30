@@ -12,10 +12,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.edtodo.R;
 import com.example.edtodo.logic.Note;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder> {
-    private List<Note> notes;
+    private List<Note> notes = new ArrayList<>();
     private OnNoteClickListener onNoteClickListener;
 
     public void setNotes(List<Note> notes) {

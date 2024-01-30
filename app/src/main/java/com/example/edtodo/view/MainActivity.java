@@ -2,6 +2,8 @@ package com.example.edtodo.view;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,8 +15,10 @@ import com.example.edtodo.db.NoteDatabase;
 import com.example.edtodo.logic.Note;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.List;
 
+public class MainActivity extends AppCompatActivity {
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private RecyclerView noteRecycleView;
     private FloatingActionButton addNoteButton;
     private NoteAdapter noteAdapter;
@@ -48,8 +52,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 Note note = noteAdapter.getNotes().get(viewHolder.getAdapterPosition());
-                database.noteDao().remove(note.getId());
-                showNotes();
+
+                new Thread(() -> {
+                    database.noteDao().remove(note.getId());
+                    handler.post(() -> showNotes());
+
+                }).start();
+
             }
         });
         itemTouchHelper.attachToRecyclerView(noteRecycleView);
@@ -72,6 +81,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showNotes() {
-        noteAdapter.setNotes(database.noteDao().getNotes());
+        new Thread(() -> {
+            List<Note> notes = database.noteDao().getNotes();
+            handler.post(() -> noteAdapter.setNotes(notes));
+        }).start();
     }
 }

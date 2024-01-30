@@ -3,6 +3,8 @@ package com.example.edtodo.view;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -15,7 +17,7 @@ import com.example.edtodo.logic.Note;
 import com.example.edtodo.logic.Priority;
 
 public class CreateNoteActivity extends AppCompatActivity {
-
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private EditText noteEditText;
     private RadioButton radioButtonLow;
     private RadioButton radioButtonMedium;
@@ -47,9 +49,11 @@ public class CreateNoteActivity extends AppCompatActivity {
                 0,
                 noteEditText.getText().toString().trim(),
                 getSelectedPriority());
-        database.noteDao().add(note);
 
-        finish();
+        new Thread(() -> {
+            database.noteDao().add(note);
+            handler.post(this::finish);
+        }).start();
     }
 
     private Priority getSelectedPriority() {
