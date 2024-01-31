@@ -2,9 +2,11 @@ package com.example.edtodo.view;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,15 +25,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        viewModel = new MainViewModel(getApplication());
+        viewModel = new ViewModelProvider(this).get(MainViewModel.class);
         initViews();
 
         noteAdapter = new NoteAdapter();
-        noteAdapter.setOnNoteClickListener(note -> {
-        });
+        noteAdapter.setOnNoteClickListener(note -> viewModel.incrementCount());
         noteRecycleView.setAdapter(noteAdapter);
 
         viewModel.getNotes().observe(this, notes -> noteAdapter.setNotes(notes));
+
+        viewModel.getCountLD().observe(this, integer -> {
+            Toast.makeText(this, String.valueOf(integer), Toast.LENGTH_SHORT).show();
+        });
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
                 0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {

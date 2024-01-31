@@ -3,26 +3,24 @@ package com.example.edtodo.view;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.edtodo.R;
-import com.example.edtodo.db.NoteDatabase;
 import com.example.edtodo.logic.Note;
 import com.example.edtodo.logic.Priority;
+import com.example.edtodo.viewmodel.CreateNoteViewModel;
 
 public class CreateNoteActivity extends AppCompatActivity {
-    private final Handler handler = new Handler(Looper.getMainLooper());
     private EditText noteEditText;
     private RadioButton radioButtonLow;
     private RadioButton radioButtonMedium;
     private Button saveNoteButton;
-    private NoteDatabase database;
+    private CreateNoteViewModel viewModel;
 
     public static Intent newIntent(Context context) {
         return new Intent(context, CreateNoteActivity.class);
@@ -32,7 +30,12 @@ public class CreateNoteActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_note);
-        database = NoteDatabase.getInstance(getApplication());
+        viewModel = new ViewModelProvider(this).get(CreateNoteViewModel.class);
+        viewModel.getShouldCloseScreen().observe(this, shouldClose -> {
+            if (shouldClose) {
+                finish();
+            }
+        });
         initViews();
         saveNoteButton.setOnClickListener(view -> saveButtonListener());
     }
@@ -49,11 +52,7 @@ public class CreateNoteActivity extends AppCompatActivity {
                 0,
                 noteEditText.getText().toString().trim(),
                 getSelectedPriority());
-
-        new Thread(() -> {
-            database.noteDao().add(note);
-            handler.post(this::finish);
-        }).start();
+        viewModel.saveNote(note);
     }
 
     private Priority getSelectedPriority() {
