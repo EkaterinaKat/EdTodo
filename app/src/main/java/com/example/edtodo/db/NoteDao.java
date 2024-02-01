@@ -9,6 +9,8 @@ import com.example.edtodo.logic.Note;
 
 import java.util.List;
 
+import io.reactivex.rxjava3.core.Completable;
+
 @Dao
 public interface NoteDao {
 
@@ -16,7 +18,7 @@ public interface NoteDao {
     LiveData<List<Note>> getNotes();
 
     @Insert
-    void add(Note note);
+    Completable add(Note note);
 
     @Query("DELETE FROM note WHERE id = :id")
     void remove(int id);
