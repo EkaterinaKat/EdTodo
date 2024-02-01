@@ -1,7 +1,6 @@
 package com.example.edtodo.viewmodel;
 
 import android.app.Application;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -22,6 +21,7 @@ public class MainViewModel extends AndroidViewModel {
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
     private final NoteDatabase database;
     private final MutableLiveData<Integer> countLD = new MutableLiveData<>();
+    private final MutableLiveData<List<Note>> notesLD = new MutableLiveData<>();
     private int count = 0;
 
     public MainViewModel(@NonNull Application application) {
@@ -33,12 +33,20 @@ public class MainViewModel extends AndroidViewModel {
         Disposable disposable = database.noteDao().remove(note.getId())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(() -> Log.i("MainViewModel", "note removed"));
+                .subscribe(this::refreshList);
+        compositeDisposable.add(disposable);
+    }
+
+    public void refreshList() {
+        Disposable disposable = database.noteDao().getNotes()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(notesLD::setValue);
         compositeDisposable.add(disposable);
     }
 
     public LiveData<List<Note>> getNotes() {
-        return database.noteDao().getNotes();
+        return notesLD;
     }
 
     public void incrementCount() {

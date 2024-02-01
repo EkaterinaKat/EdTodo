@@ -1,6 +1,5 @@
 package com.example.edtodo.db;
 
-import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -10,12 +9,13 @@ import com.example.edtodo.logic.Note;
 import java.util.List;
 
 import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
 
 @Dao
 public interface NoteDao {
 
     @Query("SELECT * FROM note")
-    LiveData<List<Note>> getNotes();
+    Single<List<Note>> getNotes();
 
     @Insert
     Completable add(Note note);
