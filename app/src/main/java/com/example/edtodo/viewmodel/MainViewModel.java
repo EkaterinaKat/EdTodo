@@ -1,6 +1,7 @@
 package com.example.edtodo.viewmodel;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -13,6 +14,8 @@ import com.example.edtodo.logic.Note;
 import java.util.List;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -30,19 +33,29 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public void remove(Note note) {
-        Disposable disposable = database.noteDao().remove(note.getId())
+        Disposable disposable = removeRx(note)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::refreshList);
+                .subscribe(this::refreshList,
+                        throwable -> Log.i("remove", "error!!!"));
         compositeDisposable.add(disposable);
     }
 
+    private Completable removeRx(Note note) {
+        return Completable.fromAction(() -> database.noteDao().remove(note.getId()));
+    }
+
     public void refreshList() {
-        Disposable disposable = database.noteDao().getNotes()
+        Disposable disposable = getNotesRx()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(notesLD::setValue);
+                .subscribe(notesLD::setValue,
+                        throwable -> Log.i("refreshList", "error!!!"));
         compositeDisposable.add(disposable);
+    }
+
+    private Single<List<Note>> getNotesRx() {
+        return Single.fromCallable(() -> database.noteDao().getNotes());
     }
 
     public LiveData<List<Note>> getNotes() {
