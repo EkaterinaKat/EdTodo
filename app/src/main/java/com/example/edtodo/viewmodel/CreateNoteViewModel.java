@@ -11,7 +11,6 @@ import com.example.edtodo.db.NoteDatabase;
 import com.example.edtodo.logic.Note;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -27,7 +26,7 @@ public class CreateNoteViewModel extends AndroidViewModel {
     }
 
     public void saveNote(Note note) {
-        Disposable disposable = addNoteRx(note)
+        Disposable disposable = database.noteDao().add(note)
                 //данная строчка командует чтобы add(note) выполнялся в фоновом потоке
                 .subscribeOn(Schedulers.io())
                 //данная строчка командует чтобы все инструкции указанные ниже выполнялись в главном потоке
@@ -38,10 +37,6 @@ public class CreateNoteViewModel extends AndroidViewModel {
                         },
                         throwable -> Log.i("saveNote", "error!!!"));
         compositeDisposable.add(disposable);
-    }
-
-    private Completable addNoteRx(Note note) {
-        return Completable.fromAction(() -> database.noteDao().add(note));
     }
 
     public MutableLiveData<Boolean> getShouldCloseScreen() {
